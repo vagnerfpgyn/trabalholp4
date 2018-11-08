@@ -1,17 +1,17 @@
 module.exports = function(app){
 
+
     app.post('/pergunta', function(req, resp){
-    data = req.body;
-    
+    data = req.body;    
     var con = app.persistencia.connectionFactory;
     var dao = new app.persistencia.perguntasDAO(con);
-    var service = new app.service.perguntaService();
-    response = service.validarDados(data);
-    if(!response.status){
+    var service = new app.service.perguntaService();  
+     response = service.validarDados(data);
+        if(!response.status){
         resp.status(400);
         resp.json({"message": response.message});   
         return;
-    }
+        }   
 
     data.deletado = 0;      
    
@@ -28,7 +28,8 @@ module.exports = function(app){
         resp.send(data);
 
     })
-    service
+    
+
     })
 
     app.get('/pergunta', function (req, resp){
@@ -124,47 +125,66 @@ module.exports = function(app){
 
     });
 
-    app.put('/consulta/:id', function(req, resp){
-        param = req.params;
-        novo = req.body;
+    app.put('/pergunta/:id', function(req, resp){
+        param = req.params
+        nova = req.body;
         var con = app.persistencia.connectionFactory;
         var dao = new app.persistencia.perguntasDAO(con);
+        var service = new app.service.perguntaService();
+
+
 
         dao.findById(param.id, function(exception, result){
             if(exception){
                 resp.status(500);
-                resp.send({"mensagem":"Erro ao salvar consulta !"});
+                resp.send({"mensagem":"Erro ao salvar pergunta !"});
                 console.log(exception);
                 return;
             }
 
             if(result.length == 0){
                 resp.status(404);
-                resp.send({"message":"Consulta não encontrada !"});
+                resp.send({"message":"Pergunta não encontrada !"});
                 return;
             }
-            console.log(result);
-            
-            resp.send(result[0]); 
-            antiga = result[0];
+         
+            antiga = JSON.stringify(result[0]);
+            antiga = JSON.parse(antiga);
+            antiga.respostas = JSON.parse(antiga.respostas)        
             antiga.pergunta = nova.pergunta;
             antiga.respostas = nova.respostas;
             antiga.categoria = nova.categoria;
 
-            dao.update(param.id, antiga, function(exception, result){
+            response = service.validarDados(antiga);
+            if(!response.status){
+                resp.status(400);
+                resp.json({"message": response.message});   
+                return;
+            }
 
+
+
+           antiga.respostas = JSON.stringify(antiga.respostas);
+            dao.update(param.id, antiga, function(exception, result){
+              
                 if(exception){
                 resp.status(500);
-                    resp.send({"mensagem":"Erro ao alterar a consulta !"});
+                    resp.send({"mensagem":"Erro ao alterar a pergunta !"});
                     console.log(exception);
                     return;
                 }
+                resp.status(200);
+                resp.send({"mensagem":"Pergunta alterada com sucesso !"});  
 
-                resp.send({"mensagem":"Consulta alterada com sucesso !"});
             });
+
+            
 
         });
 
+
     });
+
+    
 
 }

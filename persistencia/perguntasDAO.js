@@ -39,9 +39,9 @@ class perguntasDAO{
         }
     }
 
-    update(id, usuario, callaback){
+    update(id,pergunta,callback){
         try{
-            this._con.query('update consulta_resposta set ? where id = ?', [consulta, id], callaback);
+            this._con.query('update pergunta_resposta set ? where id = ?', [pergunta, id], callback);
 
         }catch(error){
             console.log(error);
